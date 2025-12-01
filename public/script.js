@@ -6,31 +6,26 @@ const blueHeartBtn = document.getElementById('blue-heart-btn');
 const app = document.getElementById('app');
 
 // State
-let isBlueUnlocked = localStorage.getItem('blueHeartUnlocked') === 'true';
-
-// Check for unlock parameter in URL
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('unlocked') === 'true') {
-    isBlueUnlocked = true;
-    localStorage.setItem('blueHeartUnlocked', 'true');
-    // Clean up URL
-    window.history.replaceState({}, document.title, "/");
-}
-
-// Update UI based on unlock state
-if (isBlueUnlocked) {
-    blueHeartBtn.style.display = 'none'; // Hide the buy button if already unlocked
-    // Optional: Add a visual indicator that Blue Heart is active
-    const indicator = document.createElement('div');
-    indicator.textContent = "💙 Blue Heart Unlocked";
-    indicator.style.cssText = "position: absolute; top: 80px; color: #4d94ff; font-weight: bold; pointer-events: none;";
-    document.querySelector('.controls').appendChild(indicator);
-}
+let tapCount = parseInt(localStorage.getItem('tapCount') || '0');
+const tapCounter = document.getElementById('tap-counter');
+tapCounter.textContent = `Taps: ${tapCount}`;
 
 // Handle Taps
 function handleTap(x, y) {
-    // Determine heart type
-    const type = isBlueUnlocked ? 'blue' : 'red';
+    // Increment and save tap count
+    tapCount++;
+    localStorage.setItem('tapCount', tapCount.toString());
+    tapCounter.textContent = `Taps: ${tapCount}`;
+
+    // Determine heart type based on thresholds
+    let type = 'red';
+    if (tapCount >= 10000) {
+        type = 'diamond';
+    } else if (tapCount >= 5000) {
+        type = 'gold';
+    } else if (tapCount >= 1000) {
+        type = 'blue';
+    }
 
     // Convert to percentage for broadcasting
     const xPercent = x / window.innerWidth;
