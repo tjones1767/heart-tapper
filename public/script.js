@@ -8,14 +8,57 @@ const app = document.getElementById('app');
 // State
 let tapCount = parseInt(localStorage.getItem('tapCount') || '0');
 const tapCounter = document.getElementById('tap-counter');
-tapCounter.textContent = `Taps: ${tapCount}`;
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
+
+// Levels configuration
+const LEVELS = [
+    { threshold: 0, type: 'red', name: 'Red Heart', color: '#ff4d4d' },
+    { threshold: 1000, type: 'blue', name: 'Blue Heart', color: '#4d94ff' },
+    { threshold: 5000, type: 'gold', name: 'Gold Heart', color: '#ffd700' },
+    { threshold: 10000, type: 'diamond', name: 'Diamond Heart', color: '#b9f2ff' }
+];
+
+function updateProgress() {
+    tapCounter.textContent = `Taps: ${tapCount}`;
+
+    // Find current level
+    let currentLevelIndex = 0;
+    for (let i = LEVELS.length - 1; i >= 0; i--) {
+        if (tapCount >= LEVELS[i].threshold) {
+            currentLevelIndex = i;
+            break;
+        }
+    }
+
+    const currentLevel = LEVELS[currentLevelIndex];
+    const nextLevel = LEVELS[currentLevelIndex + 1];
+
+    if (nextLevel) {
+        const tapsNeeded = nextLevel.threshold - currentLevel.threshold;
+        const tapsDone = tapCount - currentLevel.threshold;
+        const percentage = Math.min(100, Math.max(0, (tapsDone / tapsNeeded) * 100));
+
+        progressFill.style.width = `${percentage}%`;
+        progressFill.style.background = `linear-gradient(90deg, ${currentLevel.color}, ${nextLevel.color})`;
+        progressText.textContent = `Next upgrade: ${nextLevel.threshold - tapCount} taps`;
+    } else {
+        // Max level reached
+        progressFill.style.width = '100%';
+        progressFill.style.background = `linear-gradient(90deg, ${currentLevel.color}, #ffffff)`;
+        progressText.textContent = 'Max Level Reached!';
+    }
+}
+
+// Initialize
+updateProgress();
 
 // Handle Taps
 function handleTap(x, y) {
     // Increment and save tap count
     tapCount++;
     localStorage.setItem('tapCount', tapCount.toString());
-    tapCounter.textContent = `Taps: ${tapCount}`;
+    updateProgress();
 
     // Determine heart type based on thresholds
     let type = 'red';
