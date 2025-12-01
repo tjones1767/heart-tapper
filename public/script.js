@@ -28,24 +28,37 @@ if (isBlueUnlocked) {
 }
 
 // Handle Taps
-tapArea.addEventListener('click', (e) => {
-    const x = e.clientX;
-    const y = e.clientY;
-
+function handleTap(x, y) {
     // Determine heart type
-    // If unlocked, 50% chance of blue, 50% red? Or just Blue?
-    // Let's go with a mix to show off, or purely Blue to show status.
-    // Let's do 50/50 if unlocked, so it's a "Blue Heart" feature but you still contribute to the red sea.
-    // Actually, let's make it purely Blue if unlocked for maximum flex.
     const type = isBlueUnlocked ? 'blue' : 'red';
 
+    // Convert to percentage for broadcasting
+    const xPercent = x / window.innerWidth;
+    const yPercent = y / window.innerHeight;
+
     // Emit event to server
-    socket.emit('tap', { type, x, y });
+    socket.emit('tap', { type, x: xPercent, y: yPercent });
+}
+
+tapArea.addEventListener('click', (e) => {
+    handleTap(e.clientX, e.clientY);
 });
+
+tapArea.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent scrolling and ghost clicks
+    // Handle multiple touches if needed, but for now just the first one
+    for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        handleTap(touch.clientX, touch.clientY);
+    }
+}, { passive: false });
 
 // Listen for hearts from server
 socket.on('heart', (data) => {
-    createHeart(data.x, data.y, data.type);
+    // Convert percentage back to pixels
+    const x = data.x * window.innerWidth;
+    const y = data.y * window.innerHeight;
+    createHeart(x, y, data.type);
 });
 
 function createHeart(x, y, type) {
