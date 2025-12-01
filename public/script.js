@@ -7,16 +7,24 @@ const app = document.getElementById('app');
 
 // State
 let tapCount = parseInt(localStorage.getItem('tapCount') || '0');
+let selectedHeartType = localStorage.getItem('selectedHeartType') || 'red';
+
 const tapCounter = document.getElementById('tap-counter');
 const progressFill = document.getElementById('progress-fill');
 const progressText = document.getElementById('progress-text');
 
+// Modal Elements
+const skinBtn = document.getElementById('skin-btn');
+const skinModal = document.getElementById('skin-modal');
+const closeModal = document.getElementById('close-modal');
+const skinList = document.getElementById('skin-list');
+
 // Levels configuration
 const LEVELS = [
-    { threshold: 0, type: 'red', name: 'Red Heart', color: '#ff4d4d' },
-    { threshold: 1000, type: 'blue', name: 'Blue Heart', color: '#4d94ff' },
-    { threshold: 5000, type: 'gold', name: 'Gold Heart', color: '#ffd700' },
-    { threshold: 10000, type: 'diamond', name: 'Diamond Heart', color: '#b9f2ff' }
+    { threshold: 0, type: 'red', name: 'Red Heart', color: '#ff4d4d', icon: '❤️' },
+    { threshold: 1000, type: 'blue', name: 'Blue Heart', color: '#4d94ff', icon: '💙' },
+    { threshold: 5000, type: 'gold', name: 'Gold Heart', color: '#ffd700', icon: '💛' },
+    { threshold: 10000, type: 'diamond', name: 'Diamond Heart', color: '#b9f2ff', icon: '💎' }
 ];
 
 function updateProgress() {
@@ -50,6 +58,44 @@ function updateProgress() {
     }
 }
 
+// Skin Selection Logic
+function renderSkinModal() {
+    skinList.innerHTML = '';
+
+    LEVELS.forEach(level => {
+        const isUnlocked = tapCount >= level.threshold;
+        const isSelected = selectedHeartType === level.type;
+
+        const option = document.createElement('div');
+        option.className = `skin-option ${isSelected ? 'selected' : ''} ${!isUnlocked ? 'locked' : ''}`;
+
+        option.innerHTML = `
+            <div class="skin-preview" style="color: ${level.color}">${level.icon}</div>
+            <div class="skin-name">${level.name}</div>
+            ${!isUnlocked ? `<div style="font-size: 0.8rem; opacity: 0.7">Unlocks at ${level.threshold}</div>` : ''}
+        `;
+
+        if (isUnlocked) {
+            option.onclick = () => {
+                selectedHeartType = level.type;
+                localStorage.setItem('selectedHeartType', selectedHeartType);
+                renderSkinModal(); // Re-render to update selection
+            };
+        }
+
+        skinList.appendChild(option);
+    });
+}
+
+skinBtn.onclick = () => {
+    renderSkinModal();
+    skinModal.classList.remove('hidden');
+};
+
+closeModal.onclick = () => {
+    skinModal.classList.add('hidden');
+};
+
 // Initialize
 updateProgress();
 
@@ -60,15 +106,8 @@ function handleTap(x, y) {
     localStorage.setItem('tapCount', tapCount.toString());
     updateProgress();
 
-    // Determine heart type based on thresholds
-    let type = 'red';
-    if (tapCount >= 10000) {
-        type = 'diamond';
-    } else if (tapCount >= 5000) {
-        type = 'gold';
-    } else if (tapCount >= 1000) {
-        type = 'blue';
-    }
+    // Use selected heart type
+    const type = selectedHeartType;
 
     // Convert to percentage for broadcasting
     const xPercent = x / window.innerWidth;

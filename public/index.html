@@ -13,6 +13,7 @@
     <div id="app">
         <div class="controls">
             <a href="https://buymeacoffee.com/tylerj4180" id="tip-jar" target="_blank" class="btn">☕ Tip Jar</a>
+            <button id="skin-btn" class="btn">❤️ Skins</button>
             <div id="tap-counter" class="btn" style="pointer-events: none;">Taps: 0</div>
         </div>
         <div id="tap-area">
@@ -24,6 +25,14 @@
                 <div id="progress-fill"></div>
             </div>
             <div id="progress-text">Next upgrade: 1000 taps</div>
+        </div>
+    </div>
+
+    <div id="skin-modal" class="hidden">
+        <div class="modal-content">
+            <h2>Select Heart Style</h2>
+            <div id="skin-list"></div>
+            <button id="close-modal" class="btn">Close</button>
         </div>
     </div>
 
