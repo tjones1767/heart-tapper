@@ -1,0 +1,13 @@
+{
+  "name": "heart-tapper",
+  "version": "1.0.0",
+  "description": "A viral single-page website where users tap their screen to release a floating heart.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}
